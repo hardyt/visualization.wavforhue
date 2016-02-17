@@ -21,14 +21,6 @@
 // Waveform.vis
 // A simple visualisation example by MrC
 
-//
-#include <atomic>
-#include <chrono>
-#include <iostream>
-#include <mutex>
-#include <queue>
-#include <thread>
-//
 
 //--------------------------------------------------------------------------------------
 #include <xbmc_vis_dll.h>
@@ -50,6 +42,25 @@
 #endif
 #endif
 
+//------------------------------------------------------------------
+#ifdef _WIN32
+#ifndef curl_socket_typedef
+/* socket typedef */
+#include <winsock2.h>
+typedef SOCKET curl_socket_t;
+#define CURL_SOCKET_BAD INVALID_SOCKET
+#endif
+#endif
+#include <atomic>
+#include <chrono>
+#include <iostream>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <curl/curl.h>
+//----------------------------------------------------------------------
+
+/*
 char g_visName[512];
 #ifndef HAS_OPENGL
 ID3D11Device*             g_device = NULL;
@@ -148,55 +159,67 @@ bool init_renderer_objs()
 }
 #endif // !HAS_OPENGL
 //--------------------------------------------------------------------------------------
-
+*/
 
 
 //curl thread initialization -------------------------------------------------
 // this struct will go in the stack for the curl thread to read
-void putWorkerThread();
+/*
 struct PutData
 {
   std::string url;
   std::string json;
 };
+*/
 //stack for putData - pushed by the main thread, top'ed and pop'ed by the curl thread
 //std::queue<PutData> gQueue;
-std::queue<int> gQueue;
-std::mutex gMutex;
+//std::queue<int> gQueue;
+//std::mutex gMutex;
 std::atomic<bool> gRunThread(true);
 std::thread gWorkerThread;
 // end curl thread initialization ---------------------------------------------
 
 
+size_t noop_cb(void *ptr, size_t size, size_t nmemb, void *data) {
+  return size * nmemb;
+}
+
+
 void workerThread()
 {
+  //PutData workerPutData;
+  //CURL *curl = curl_easy_init();
+  //CURLcode res;
+
+  //workerPutData.json = "{\"on\":true}";
+  //workerPutData.url = "http://192.168.10.6/api/KodiVisWave/lights/3/state";
+
   while (gRunThread)
   {
-    std::lock_guard<std::mutex> lock(gMutex);
-    bool isEmpty = gQueue.empty();
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 
+    //bool isEmpty = true;
+    /*
+    {
+      std::lock_guard<std::mutex> lock(gMutex);
+      bool isEmpty = gQueue.empty();
+    }
+    */
+    /*
     if (isEmpty)
     {
       std::this_thread::sleep_for(std::chrono::seconds(2));
     }
-
     else
     {
-      PutData workerPutData;
-      //CURL *curl = curl_easy_init();
-      //CURLcode res;
-      bool curl = true;
-
-      workerPutData.json = "{\"on\":true}";
-      workerPutData.url = "http://192.168.10.6/api/KodiVisWave/lights/3/state";
-
+      /*
       std::lock_guard<std::mutex> lock(gMutex);
       //PutData workerPutData = gQueue.front();
       int value = gQueue.front();
       gQueue.pop();
+
       if (curl)
       {
-        /*
         // Now specify we want to PUT data, but not using a file, so it has to be a CUSTOMREQUEST
         curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 1);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 3L);
@@ -207,16 +230,18 @@ void workerThread()
         curl_easy_setopt(curl, CURLOPT_URL, workerPutData.url.c_str());
         // Perform the request, res will get the return code
         res = curl_easy_perform(curl);
-        // always cleanup curl
-        if (curl)
-        {
-          curl_easy_cleanup(curl);
-        }
-        */
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
+    */
   }
+  /*
+  // always cleanup curl
+  if (curl)
+  {
+    curl_easy_cleanup(curl);
+  }
+  */
 }
 
 
@@ -229,7 +254,7 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
 {
   if (!props)
     return ADDON_STATUS_UNKNOWN;
-
+  /*
   VIS_PROPS* visProps = (VIS_PROPS*)props;
 
 #ifdef HAS_OPENGL
@@ -247,7 +272,7 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
   if (!init_renderer_objs())
     return ADDON_STATUS_PERMANENT_FAILURE;
 #endif
-  gWorkerThread = std::thread(&workerThread);
+    */
 
   return ADDON_STATUS_OK;
 }
@@ -258,6 +283,7 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
 extern "C" void Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, const char* szSongName)
 {
   //printf("Got Start Command\n");
+  gWorkerThread = std::thread(&workerThread);
 }
 
 //-- Audiodata ----------------------------------------------------------------
@@ -265,6 +291,7 @@ extern "C" void Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, con
 //-----------------------------------------------------------------------------
 extern "C" void AudioData(const float* pAudioData, int iAudioDataLength, float *pFreqData, int iFreqDataLength)
 {
+  /*
   int ipos=0;
   while (ipos < 512)
   {
@@ -276,13 +303,16 @@ extern "C" void AudioData(const float* pAudioData, int iAudioDataLength, float *
       if (ipos >= 512) break;
     }
   }
+  */
 
+  /*
   if (gQueue.size() < 10) //don't overload the queue
   {
     std::lock_guard<std::mutex> lock(gMutex);
     //gQueue.push(mainPutData);
     gQueue.push(1);
   }
+  */
 }
 
 
@@ -291,6 +321,7 @@ extern "C" void AudioData(const float* pAudioData, int iAudioDataLength, float *
 //-----------------------------------------------------------------------------
 extern "C" void Render()
 {
+  /*
   Vertex_t  verts[512];
 
 #ifndef HAS_OPENGL
@@ -377,7 +408,7 @@ extern "C" void Render()
   // draw right channel
   g_context->Draw(256, 256);
 #endif
-
+  */
 }
 
 //-- GetInfo ------------------------------------------------------------------
@@ -444,6 +475,7 @@ extern "C" void ADDON_Stop()
 //-----------------------------------------------------------------------------
 extern "C" void ADDON_Destroy()
 {
+  /*
 #ifndef HAS_OPENGL
   if (g_cViewPort)
     g_cViewPort->Release();
@@ -458,6 +490,8 @@ extern "C" void ADDON_Destroy()
   if (g_device)
     g_device->Release();
 #endif
+    */
+
   gRunThread = false;
   if (gWorkerThread.joinable())
   {
