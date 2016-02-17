@@ -1,22 +1,22 @@
-Source: kodi-visualization-waveform
+Source: kodi-visualization-wavforhue
 Priority: extra
-Maintainer: Arne Morten Kvarving <spiff@xbmc.org>
+Maintainer: hardyt <thomas.m.hardy@gmail.com>
 Build-Depends: debhelper (>= 8.0.0), cmake, kodi-addon-dev, libkodiplatform-dev,
                kodi-visualization-dev, libgl1-mesa-dev
 Standards-Version: 3.9.5
 Section: libs
 Homepage: http://xbmc.org
 
-Package: kodi-visualization-waveform
+Package: kodi-visualization-wavforhue
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Waveform visualization for Kodi
- Waveform visualization for Kodi
+Description: WaveforHue visualization for Kodi
+ WavforHue visualization for Kodi
 
-Package: kodi-visualization-waveform-dbg
+Package: kodi-visualization-wavforhue-dbg
 Section: debug
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: debug symbols for Waveform visualization for Kodi
- debug symbols for Waveform visualization for Kodi
+Description: debug symbols for WavforHue visualization for Kodi
+ debug symbols for WavforHue visualization for Kodi

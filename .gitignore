@@ -1,0 +1,3 @@
+visualization.wavforhue/addon.xml
+src/DefaultPixelShader.inc
+src/DefaultVertexShader.inc

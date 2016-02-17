@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <addon
-  id="visualization.waveform"
-  version="1.0.16"
-  name="Waveform"
-  provider-name="MrC">
+  id="visualization.wavforhue"
+  version="0.0.4"
+  name="WavforHue"
+  provider-name="hardyt">
   <extension
     point="xbmc.player.musicviz"
-    library_windows="visualization.waveform.dll"/>
+    library_@PLATFORM@="@LIBRARY_FILENAME@"/>
   <extension point="xbmc.addon.metadata">
     <summary lang="af">Visualisering wat 2 golfvorm grafieke op die skerm vertoon</summary>
     <summary lang="ar">التصوير يظهر2 رسم بياني موجي على الشاشة</summary>
@@ -115,6 +115,6 @@
     <description lang="vi">Waveform là một màn trình diễn đồ họa đơn giản hiển thị 2 đường sóng lên màn hình, Mỗi đường sóng sẽ đại diện cho một kênh tín hiệu loa trái hoặc phải di chuyển theo nhịp điệu của bài hát</description>
     <description lang="zh">Waveform 是一个简单的可视化效果，它在屏幕上显示两个波形图，分别与音乐左右声道的节拍相呼应。</description>
     <description lang="zh_TW">Waveform是一個簡單的可在屏幕上顯示2波形圖的視覺效果，左右聲道會跟著音樂節拍移動</description>
-    <platform>windows</platform>
+    <platform>@PLATFORM@</platform>
   </extension>
 </addon>

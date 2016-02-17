@@ -1,4 +1,4 @@
-project(visualization.waveform)
+project(visualization.wavforhue)
 
 cmake_minimum_required(VERSION 2.6)
 
@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR})
 
 find_package(kodi REQUIRED)
 
-set(WAVEFORM_SOURCES src/Main.cpp)
+set(WAVFORHUE_SOURCES src/Main.cpp)
 
 if(WIN32)
   set(SHADER_FILES src/DefaultVertexShader.hlsl
@@ -42,7 +42,7 @@ else()
     if(OPENGLES2_FOUND)
       set(INCLUDES ${OPENGLES2_INCLUDE_DIR})
       add_definitions(-DHAS_GLES2)
-      set(WAVEFORM_SOURCES src/Main_gles.cpp
+      set(WAVFORHUE_SOURCES src/Main_gles.cpp
                            src/VisGUIShader.cpp
                            src/VisMatrixGLES.cpp
                            src/VisShader.cpp)
@@ -56,6 +56,6 @@ endif()
 include_directories(${INCLUDES}
                     ${KODI_INCLUDE_DIR})
 
-build_addon(visualization.waveform WAVEFORM DEPLIBS)
+build_addon(visualization.wavforhue WAVFORHUE DEPLIBS)
 
 include(CPack)
