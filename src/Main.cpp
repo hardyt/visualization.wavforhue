@@ -30,7 +30,7 @@
 
 
 // thread initialization -------------------------------------------------
-std::atomic<bool> gRunThread;
+std::atomic<bool> gRunThread, gThreadStarted;
 std::thread gWorkerThread;
 // end  thread initialization ---------------------------------------------
 
@@ -55,7 +55,7 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
     return ADDON_STATUS_UNKNOWN;
 
   gRunThread = false;
-  gWorkerThread = std::thread(&workerThread);
+  gThreadStarted = false;
 
   return ADDON_STATUS_OK;
 }
@@ -72,7 +72,12 @@ extern "C" void Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, con
 //-----------------------------------------------------------------------------
 extern "C" void AudioData(const float* pAudioData, int iAudioDataLength, float *pFreqData, int iFreqDataLength)
 {
- 
+  if (!gThreadStarted)
+  {
+    gWorkerThread = std::thread(&workerThread);
+    gThreadStarted = true;
+  }
+  
 }
 
 
