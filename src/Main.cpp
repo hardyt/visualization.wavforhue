@@ -54,8 +54,6 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
   if (!props)
     return ADDON_STATUS_UNKNOWN;
   
-  gWorkerThread = std::thread(&workerThread);
-
   gRunThread = false;
   gThreadStarted = false;
 
