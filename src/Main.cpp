@@ -30,7 +30,7 @@
 
 
 // thread initialization -------------------------------------------------
-std::atomic<bool> gRunThread(true);
+std::atomic<bool> gRunThread;
 std::thread gWorkerThread;
 // end  thread initialization ---------------------------------------------
 
@@ -54,6 +54,9 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
   if (!props)
     return ADDON_STATUS_UNKNOWN;
 
+  gRunThread = false;
+  gWorkerThread = std::thread(&workerThread);
+
   return ADDON_STATUS_OK;
 }
 
@@ -62,8 +65,6 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
 //-----------------------------------------------------------------------------
 extern "C" void Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, const char* szSongName)
 {
-  //printf("Got Start Command\n");
-  gWorkerThread = std::thread(&workerThread);
 }
 
 //-- Audiodata ----------------------------------------------------------------
