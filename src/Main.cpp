@@ -1,6 +1,6 @@
 /*
- *      Copyright (C) 2008-2013 Team XBMC
- *      http://xbmc.org
+ *      Copyright (C) 2008-2016 Team Kodi
+ *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,6 +53,8 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
 {
   if (!props)
     return ADDON_STATUS_UNKNOWN;
+  
+  gWorkerThread = std::thread(&workerThread);
 
   return ADDON_STATUS_OK;
 }
@@ -62,8 +64,6 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
 //-----------------------------------------------------------------------------
 extern "C" void Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, const char* szSongName)
 {
-  //printf("Got Start Command\n");
-  gWorkerThread = std::thread(&workerThread);
 }
 
 //-- Audiodata ----------------------------------------------------------------
