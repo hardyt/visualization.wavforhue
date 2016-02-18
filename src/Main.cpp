@@ -30,7 +30,8 @@
 
 
 // thread initialization -------------------------------------------------
-std::atomic<bool> gRunThread, gThreadStarted;
+std::atomic<bool> gRunThread;
+bool gThreadStarted;
 std::thread gWorkerThread;
 // end  thread initialization ---------------------------------------------
 
@@ -74,6 +75,7 @@ extern "C" void AudioData(const float* pAudioData, int iAudioDataLength, float *
 {
   if (!gThreadStarted)
   {
+    gRunThread = true;
     gWorkerThread = std::thread(&workerThread);
     gThreadStarted = true;
   }
