@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR})
 
 find_package(kodi REQUIRED)
+find_package(CURL REQUIRED)
 
 set(WAVFORHUE_SOURCES src/Main.cpp)
 
@@ -53,7 +54,13 @@ else()
   endif()
 endif()
 
+list(APPEND DEPLIBS ${CURL_LIBRARIES})
+if(WIN32)
+  list(APPEND DEPLIBS ws2_32)
+endif()
+
 include_directories(${INCLUDES}
+                    ${CURL_INCLUDE_DIR}  
                     ${KODI_INCLUDE_DIR})
 
 build_addon(visualization.wavforhue WAVFORHUE DEPLIBS)
