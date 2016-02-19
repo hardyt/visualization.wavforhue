@@ -51,6 +51,8 @@ std::queue<int> gQueue;
 
 void workerThread()
 {
+  // Must initialize libcurl before any threads are started.
+  //curl_global_init(CURL_GLOBAL_ALL);
   bool isEmpty;
   std::string json;
   // This thread comes alive when AudioData() has put an item in the stack
@@ -78,7 +80,6 @@ void workerThread()
     }
     if (!isEmpty)
     {
-      /*
       CURL *curl = curl_easy_init();
       CURLcode res;
       json = "{\"hue\":" + std::to_string(rand() % 60000) + "}";
@@ -94,7 +95,6 @@ void workerThread()
       res = curl_easy_perform(curl);
       // always cleanup curl
       curl_easy_cleanup(curl);
-      */
     }
   }
 }
