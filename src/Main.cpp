@@ -26,21 +26,52 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
 //----------------------------------------------------------------------
 
 
 // thread initialization -------------------------------------------------
+std::mutex gMutex;
+std::condition_variable gThreadConditionVariable;
 std::atomic<bool> gRunThread;
-bool gThreadStarted;
+bool gReady;
 std::thread gWorkerThread;
+std::queue<int> gQueue;
 // end  thread initialization ---------------------------------------------
 
 
 void workerThread()
 {
+  bool isEmpty;
+  // This thread comes alive when AudioData() has put an item in the stack
+  // It runs until Destroy() sets gRunThread to false and joins it
   while (gRunThread)
   {
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    //check that an item is on the stack
+    
+    {
+      std::lock_guard<std::mutex> lock(gMutex);
+      isEmpty = gQueue.empty();
+    }
+
+    if (isEmpty)
+    {
+      //Wait until AudioData() sends data.
+      std::unique_lock<std::mutex> lock(gMutex);
+      gThreadConditionVariable.wait(lock, []{return gReady; });
+    }
+    else
+    {
+      std::lock_guard<std::mutex> lock(gMutex);
+      int value = gQueue.front();
+      gQueue.pop();
+    }
+    if (!isEmpty)
+    {
+      //cURL stuff here
+    }
   }
 }
 
@@ -50,13 +81,13 @@ void workerThread()
 //-- Create -------------------------------------------------------------------
 // Called on load. Addon should fully initalize or return error status
 //-----------------------------------------------------------------------------
-ADDON_STATUS ADDON_Create(void* hdl, void* props)
+extern "C" ADDON_STATUS ADDON_Create(void* hdl, void* props)
 {
   if (!props)
     return ADDON_STATUS_UNKNOWN;
   
   gRunThread = false;
-  gThreadStarted = false;
+  gReady = false;
 
   return ADDON_STATUS_OK;
 }
@@ -73,13 +104,26 @@ extern "C" void Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, con
 //-----------------------------------------------------------------------------
 extern "C" void AudioData(const float* pAudioData, int iAudioDataLength, float *pFreqData, int iFreqDataLength)
 {
-  if (!gThreadStarted)
+  // Processing audio data
+  {
+    std::lock_guard<std::mutex> lock(gMutex);
+    gQueue.push(1);
+  }
+
+  // Check if the thread is alive yet.
+  if (!gWorkerThread.joinable())
   {
     gRunThread = true;
     gWorkerThread = std::thread(&workerThread);
-    gThreadStarted = true;
   }
-  
+
+  // Send the curl calls to the worker thread
+  {
+    std::lock_guard<std::mutex> lock(gMutex);
+    gReady = true;
+  }
+  gThreadConditionVariable.notify_one();
+
 }
 
 
