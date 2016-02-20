@@ -22,10 +22,6 @@
 //--------------------------------------------------------------------------------------
 #include <xbmc_vis_dll.h>
 #include <stdio.h>
-#ifdef _WIN32
-#include <winsock2.h>
-#endif
-#include <curl/curl.h>
 #include <string>
 //------------------------------------------------------------------
 
@@ -51,21 +47,17 @@ std::queue<int> gQueue;
 
 void workerThread()
 {
-  // Must initialize libcurl before any threads are started.
-  //curl_global_init(CURL_GLOBAL_ALL);
   bool isEmpty;
   std::string json;
   // This thread comes alive when AudioData() has put an item in the stack
-  // It runs until Destroy() sets gRunThread to false and joins it
+  // It runs until Destroy() or Stop() sets gRunThread to false and joins it
   while (gRunThread)
   {
     //check that an item is on the stack
-    
     {
       std::lock_guard<std::mutex> lock(gMutex);
       isEmpty = gQueue.empty();
     }
-
     if (isEmpty)
     {
       //Wait until AudioData() sends data.
@@ -80,21 +72,7 @@ void workerThread()
     }
     if (!isEmpty)
     {
-      CURL *curl = curl_easy_init();
-      CURLcode res;
-      json = "{\"hue\":" + std::to_string(rand() % 60000) + "}";
-      // Now specify we want to PUT data, but not using a file, so it has to be a CUSTOMREQUEST
-      curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 1);
-      curl_easy_setopt(curl, CURLOPT_TIMEOUT, 3L);
-      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-      //curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, noop_cb);
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
-      // Set the URL that is about to receive our POST. 
-      curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.10.6/api/KodiVisWave/lights/3/state");
-      // Perform the request, res will get the return code
-      res = curl_easy_perform(curl);
-      // always cleanup curl
-      curl_easy_cleanup(curl);
+      //do thread things here
     }
   }
 }
@@ -118,9 +96,6 @@ extern "C" ADDON_STATUS ADDON_Create(void* hdl, void* props)
   {
     gWorkerThread = std::thread(&workerThread);
   }
-
-  // Must initialize libcurl before any threads are started.
-  //curl_global_init(CURL_GLOBAL_ALL);
 
   return ADDON_STATUS_OK;
 }
@@ -173,7 +148,7 @@ extern "C" void AudioData(const float* pAudioData, int iAudioDataLength, float *
 extern "C" void ADDON_Stop()
 {
   gRunThread = false;
-  while (gWorkerThread.joinable())
+  while (gWorkerThread.joinable())  // Kill 'em all \m/
   {
     gWorkerThread.join();
   }
@@ -186,7 +161,7 @@ extern "C" void ADDON_Stop()
 extern "C" void ADDON_Destroy()
 {
   gRunThread = false;
-  while (gWorkerThread.joinable())
+  while (gWorkerThread.joinable()) // Kill 'em all \m/
   {
     gWorkerThread.join();
   }
