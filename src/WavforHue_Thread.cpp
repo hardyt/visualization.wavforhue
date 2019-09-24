@@ -24,8 +24,6 @@
 #include "WavforHue_Thread.h"
 #endif
 
-using namespace ADDON;
-
 
 // -- Constructor ----------------------------------------------------
 WavforHue_Thread::WavforHue_Thread()
@@ -136,7 +134,7 @@ void WavforHue_Thread::HTTPRequest(SocketData socketData)
   wavforhue.SendDebug("Initializing cURL.");
   CURL *curl;
   CURLcode res;
-  std::string url = "http://" + socketData.host + socketData.path;
+  std::string url = "http://" + socketData.host + ":" + socketData.port + socketData.path;
   wavforhue.SendDebug(url.c_str());
   wavforhue.SendDebug(socketData.json.c_str());
   curl = curl_easy_init();

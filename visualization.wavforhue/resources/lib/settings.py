@@ -29,6 +29,7 @@ class settings():
 
   def readxml(self):
     self.hueBridgeIP           = __addon__.getSetting("hueBridgeIP")
+    self.hueBridgePort         = __addon__.getSetting("hueBridgePort")
     self.hueBridgeUser         = __addon__.getSetting("hueBridgeUser")
 
     self.activeLights          = __addon__.getSetting("activeLights")

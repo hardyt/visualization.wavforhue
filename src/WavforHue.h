@@ -110,6 +110,7 @@ public:
     bool on, off;
   };
   std::string strHueBridgeIPAddress, strHueBridgeUser;
+  unsigned int hueBridgePort;
   HueData afterHueData, dimmedHueData, activeHueData;
   int lastHue, initialHue, targetHue, maxBri, targetBri, currentBri;
   float beatThreshold;

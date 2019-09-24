@@ -28,125 +28,46 @@
  *  Christian Zander <phoenix@minion.de>
  */
 
+#pragma once
 
-#ifndef WAVFORHUE_MAIN
-#define WAVFORHUE_MAIN
+#include "WavforHue_Thread.h"
 
-// -- Kodi stuff----------------------------------------------------
-#include <xbmc_vis_dll.h> 
-#ifndef WAVFORHUE_KODI
-#include "WavforHue_Kodi.h"
-#endif
-// -- Kodi stuff----------------------------------------------------
+#include <kodi/addon-instance/Visualization.h>
+#include <kodi/gui/gl/Shader.h>
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-#include <cstring>
-
-
-
-// -- Waveform -----------------------------------------------------
-#ifdef HAS_OPENGL
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
-#else
-#ifdef _WIN32
-//dx11 is not working for me.
-/*
-#include <d3d11_1.h> 
-#include <DirectXMath.h>
-#include <DirectXPackedVector.h>
-*/
-#include <D3D9.h>
-#endif
-#endif
-// -- Waveform -----------------------------------------------------
-
-
-
-// -- Waveform -----------------------------------------------------
-char g_visName[512];
-#ifndef HAS_OPENGL
-/*
-ID3D11Device*             g_device = NULL;
-ID3D11DeviceContext*      g_context = NULL;
-ID3D11VertexShader*       g_vShader = NULL;
-ID3D11PixelShader*        g_pShader = NULL;
-ID3D11InputLayout*        g_inputLayout = NULL;
-ID3D11Buffer*             g_vBuffer = NULL;
-ID3D11Buffer*             g_cViewPort = NULL;
-
-using namespace DirectX;
-using namespace DirectX::PackedVector;
-
-// Include the precompiled shader code.
-namespace
+class ATTRIBUTE_HIDDEN CVisualizationWaveForHue
+  : public kodi::addon::CAddonBase,
+    public kodi::addon::CInstanceVisualization,
+    public kodi::gui::gl::CShaderProgram
 {
-#include "DefaultPixelShader.inc"
-#include "DefaultVertexShader.inc"
-}
+public:
+  CVisualizationWaveForHue();
+  ~CVisualizationWaveForHue() override;
 
-struct cbViewPort
-{
-  float g_viewPortWidth;
-  float g_viewPortHeigh;
-  float align1, align2;
+  bool Start(int channels, int samplesPerSec, int bitsPerSample, std::string songName) override;
+  void Stop() override;
+  void Render() override;
+  void AudioData(const float* audioData, int audioDataLength, float *freqData, int freqDataLength) override;
+  ADDON_STATUS SetSetting(const std::string& settingName, const kodi::CSettingValue& settingValue) override;
+
+  void OnCompiledAndLinked() override;
+  bool OnEnabled() override;
+
+private:
+  WavforHue_Thread m_wt;
+  float m_waveform[2][512];
+
+  glm::mat4 m_modelProjMat;
+
+#ifdef HAS_GL
+  GLuint m_vertexVBO = 0;
+#endif
+  GLint m_uModelProjMatrix = -1;
+  GLint m_aPosition = -1;
+  GLint m_aColor = -1;
+
+  bool m_startOK = false;
 };
-*/
-LPDIRECT3DDEVICE9 g_device;
-#else
-void* g_device;
-#endif
-float g_fWaveform[2][512];
-
-#ifdef HAS_OPENGL
-/*
-typedef struct {
-  int TopLeftX;
-  int TopLeftY;
-  int Width;
-  int Height;
-  int MinDepth;
-  int MaxDepth;
-} D3D11_VIEWPORT;
-*/
-typedef struct {
-  int X;
-  int Y;
-  int Width;
-  int Height;
-  int MinZ;
-  int MaxZ;
-} D3DVIEWPORT9;
-typedef unsigned long D3DCOLOR;
-#endif
-
-//D3D11_VIEWPORT g_viewport;
-D3DVIEWPORT9  g_viewport;
-
-struct Vertex_t
-{
-  float x, y, z;
-#ifdef HAS_OPENGL
-  D3DCOLOR  col;
-#else
-  //XMFLOAT4 col;
-  D3DCOLOR  col;
-#endif
-};
-
-#ifndef HAS_OPENGL
-#define VERTEX_FORMAT     (D3DFVF_XYZ | D3DFVF_DIFFUSE)
-#endif
-
-/*
-#ifndef HAS_OPENGL
-bool init_renderer_objs();
-#endif 
-*/
-// -- Waveform -----------------------------------------------------
-
-#endif
