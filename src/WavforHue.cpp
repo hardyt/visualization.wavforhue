@@ -19,17 +19,9 @@
 *
 */
 
-#ifndef WAVFORHUE
 #include "WavforHue.h"
-#endif
 
-// -- Kodi stuff----------------------------------------------------
-#ifndef WAVFORHUE_KODI
-#include "WavforHue_Kodi.h"
-#endif
-// -- Kodi stuff----------------------------------------------------
-
-using namespace ADDON;
+#include <kodi/General.h>
 
 // -- trim ---------------------------------------------------------
 // trim from start
@@ -151,7 +143,7 @@ void WavforHue::SaveState(std::string json)
     // Report failures and their locations in the document.
     // Oh I wish I could use debugging in here.
     SendDebug("Failed to parse JSON " + reader.getFormattedErrorMessages());
-    abort();
+    return;
   }
 
   if (root.size() > 0) {
@@ -223,6 +215,7 @@ void WavforHue::huePutRequest(HueData hueData)
   for (int i = 0; i < hueData.numberOfLights; i++)
   {
     _putData.host = strHueBridgeIPAddress;
+    _putData.port = std::to_string(hueBridgePort);
     _putData.path = "/api/" + strHueBridgeUser + "/lights/" + hueData.lightIDs[i] + "/state";
     _putData.method = "PUT";
     _putData.json = strJson;
@@ -642,9 +635,6 @@ void WavforHue::UpdateTime()
 void WavforHue::SendDebug(std::string mStrDebug)
 {
 #ifndef ANDROID
-  if (XBMC)
-    XBMC->Log(LOG_DEBUG, mStrDebug.c_str());
-#else
-  ((void)0);
+  kodi::Log(ADDON_LOG_DEBUG, mStrDebug.c_str());
 #endif
 }

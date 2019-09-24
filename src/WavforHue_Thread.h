@@ -60,14 +60,7 @@ KS-  <afedchin>: hardyt_ why u want to use cURL you can just use  CHelper_libXBM
 // -- Threading ----------------------------------------------------
 
 // -- Kodi stuff----------------------------------------------------
-#ifndef WAVFORHUE_KODI
-#include "WavforHue_Kodi.h"
-#endif
-// -- Kodi stuff----------------------------------------------------
-
-#ifndef WAVFORHUE
 #include "WavforHue.h"
-#endif
 
 // -- Threading ----------------------------------------------------
 class WavforHue_Thread
