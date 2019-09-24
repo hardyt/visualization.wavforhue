@@ -5,9 +5,9 @@
   name="WavforHue"
   provider-name="hardyt">
   <requires>
-    <import addon="xbmc.python" version="2.1.0"/>
-    <import addon="script.module.requests"/>
-  </requires>
+<import addon="xbmc.python" version="2.25.0"/>
+<import addon="script.module.requests"/>
+@ADDON_DEPENDS@</requires>
   <extension
     point="xbmc.player.musicviz"
     library_@PLATFORM@="@LIBRARY_FILENAME@"/>

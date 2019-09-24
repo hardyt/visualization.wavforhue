@@ -74,6 +74,7 @@ class Light:
       self.logger.debug()
 
     self.hueBridgeIP    = settings.hueBridgeIP
+    self.hueBridgePort  = settings.hueBridgePort
     self.hueBridgeUser  = settings.hueBridgeUser
     self.mode         = settings.mode
     self.light        = light_id
@@ -111,10 +112,10 @@ class Light:
       pass # probably a timeout
 
   def get_current_setting(self):
-    self.logger.debuglog("get_current_setting. requesting from: http://%s/api/%s/lights/%s" % \
-      (self.hueBridgeIP, self.hueBridgeUser, self.light))
-    r = requests.get("http://%s/api/%s/lights/%s" % \
-      (self.hueBridgeIP, self.hueBridgeUser, self.light))
+    self.logger.debuglog("get_current_setting. requesting from: http://%s:%s/api/%s/lights/%s" % \
+      (self.hueBridgeIP, self.hueBridgePort, self.hueBridgeUser, self.light))
+    r = requests.get("http://%s:%s/api/%s/lights/%s" % \
+      (self.hueBridgeIP, self.hueBridgePort, self.hueBridgeUser, self.light))
     j = r.json()
 
     if isinstance(j, list) and "error" in j[0]:
@@ -203,8 +204,8 @@ class Light:
 
     self.logger.debuglog("set_light2: %s: %s" % (self.light, dataString))
     
-    self.request_url_put("http://%s/api/%s/lights/%s/state" % \
-      (self.hueBridgeIP, self.hueBridgeUser, self.light), data=dataString)
+    self.request_url_put("http://%s:%s/api/%s/lights/%s/state" % \
+      (self.hueBridgeIP, self.hueBridgePort, self.hueBridgeUser, self.light), data=dataString)
 
   def flash_light(self):
     self.dim_light()
@@ -295,8 +296,8 @@ class Group(Light):
 
   def get_lights(self):
     try:
-      r = requests.get("http://%s/api/%s/groups/%s" % \
-        (self.hueBridgeIP, self.hueBridgeUser, self.group_id))
+      r = requests.get("http://%s:%s/api/%s/groups/%s" % \
+        (self.hueBridgeIP, self.hueBridgePort, self.hueBridgeUser, self.group_id))
       j = r.json()
     except:
       self.logger.debuglog("WARNING: Request to bridge failed")
@@ -311,8 +312,8 @@ class Group(Light):
 
   # def set_light(self, data):
   #   self.logger.debuglog("set_light: %s" % data)
-  #   Light.request_url_put(self, "http://%s/api/%s/groups/%s/action" % \
-  #     (self.hueBridgeIP, self.hueBridgeUser, self.group_id), data=data)
+  #   Light.request_url_put(self, "http://%s:%s/api/%s/groups/%s/action" % \
+  #     (self.hueBridgeIP, self.hueBridgePort, self.hueBridgeUser, self.group_id), data=data)
 
   def set_light2(self, hue, sat, bri, duration=None):
 
@@ -378,8 +379,8 @@ class Group(Light):
   #       self.lights[light].partial_light()
 
   def get_current_setting(self):
-    r = requests.get("http://%s/api/%s/groups/%s" % \
-      (self.hueBridgeIP, self.hueBridgeUser, self.group_id))
+    r = requests.get("http://%s:%s/api/%s/groups/%s" % \
+      (self.hueBridgeIP, self.hueBridgePort, self.hueBridgeUser, self.group_id))
     j = r.json()
     self.logger.debuglog("response: %s" % j)
     if isinstance(j, list) and "error" in j[0]:

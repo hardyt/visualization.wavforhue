@@ -20,7 +20,8 @@
   <category label="30022">  
     <setting id="config"         type="action"     label="30020" action="RunScript(special://home/addons/visualization.wavforhue/config.py,action=discover)"/>
     <setting id="hueBridgeIP"    type="ipaddress"  label="30000" enable="!eq(-1,true)" default="192.168.10.6"/>
-    <setting id="hueBridgeUser"  type="text"       label="30024" enable="!eq(-2,true)" default="KodiVisWave"/>
+    <setting id="hueBridgePort"  type="number"     label="30030" enable="!eq(-2,true)" default="80"/>
+    <setting id="hueBridgeUser"  type="text"       label="30024" enable="!eq(-3,true)" default="KodiVisWave"/>
     <setting 					           type="sep"/>
     <setting id="config_lights"  type="action"     label="30027" action="RunScript(special://home/addons/visualization.wavforhue/config.py,action=config_lights)"/>
     <setting id="activeLights"   type="text"       label="30004" default="1,2,3"/>

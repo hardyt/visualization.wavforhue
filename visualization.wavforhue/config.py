@@ -70,13 +70,14 @@ class Hue:
     if self.params['action'] == "discover":
       self.logger.debuglog("Starting discovery")
       notify("Bridge Discovery", "starting")
-      hue_ip = self.start_autodiscover()
+      hue_ip, hue_port = self.start_autodiscover()
       self.logger.debuglog("Discovery finished")
       if hue_ip != None:
         notify("Bridge Discovery", "Found bridge at: %s" % hue_ip)
-        username = self.register_user(hue_ip)
+        username = self.register_user(hue_ip, hue_port)
         self.logger.debuglog("Updating settings")
         self.settings.update(hueBridgeIP = hue_ip)
+        self.settings.update(hueBridgePort = hue_port)
         self.settings.update(hueBridgeUser = username)
         notify("Bridge Discovery", "Finished")
         self.test_connection()
@@ -130,8 +131,9 @@ class Hue:
     self.logger.debuglog("Set timeout")
 
     hue_ip = None
+    hue_port = None
     num_retransmits = 0
-    while(num_retransmits < 10) and hue_ip == None:
+    while(num_retransmits < 10) and hue_ip == None and hue_port == None:
       self.logger.debuglog("Transmitting on protocol 1")
       num_retransmits += 1
       try:
@@ -143,6 +145,7 @@ class Hue:
         if "IpBridge" in recv_data and "description.xml" in recv_data:
           self.logger.debuglog("Found IpBridge")
           hue_ip = recv_data.split("LOCATION: http://")[1].split(":")[0]
+          hue_port = recv_data.split("LOCATION: http://")[1].split(":")[1]
         time.sleep(1)
       except socket.timeout:
         self.logger.debuglog("Socket timed out")
@@ -154,24 +157,25 @@ class Hue:
       j=r.json()
       if len(j) > 0:
         hue_ip=j[0]["internalipaddress"]
+        hue_port=80
         self.logger.debuglog("meethue nupnp api returned: "+hue_ip)
       else:
         self.logger.debuglog("meethue nupnp api did not find bridge")
         
-    return hue_ip
+    return [hue_ip, hue_port]
 
-  def register_user(self, hue_ip):
+  def register_user(self, hue_ip, hue_port):
     #username = hashlib.md5(str(random.random())).hexdigest() #not needed with new strategy
     device = "kodi-wavforhue-addon"
     data = '{"devicetype": "%s#%s"}' % (device, xbmc.getInfoLabel('System.FriendlyName')[0:19])
     self.logger.debuglog("sending data: %s" % data)
 
-    r = requests.post('http://%s/api' % hue_ip, data=data)
+    r = requests.post('http://%s:%s/api' % (hue_ip, hue_port), data=data)
     response = r.text
     while "link button not pressed" in response:
       self.logger.debuglog("register user response: %s" % r)
       notify("Bridge Discovery", "Press link button on bridge")
-      r = requests.post('http://%s/api' % hue_ip, data=data)
+      r = requests.post('http://%s:%s/api' % (hue_ip, hue_port),, data=data)
       response = r.text 
       time.sleep(3)
 
@@ -183,8 +187,8 @@ class Hue:
 
   def test_connection(self):
     self.logger.debuglog("testing connection")
-    r = requests.get('http://%s/api/%s/config' % \
-      (self.settings.hueBridgeIP, self.settings.hueBridgeUser))
+    r = requests.get('http://%s:%s/api/%s/config' % \
+      (self.settings.hueBridgeIP, self.settings.hueBridgePort, self.settings.hueBridgeUser))
     test_connection = r.text.find("name")
     if not test_connection:
       notify("Failed", "Could not connect to bridge")
@@ -206,10 +210,10 @@ class Hue:
     self.settings.update(afterLights = ','.join(self.lafterLights))
       
   def get_all_lights(self):
-    self.logger.debuglog("get_all_ligts. requesting from: http://%s/api/%s/lights" % \
-      (self.settings.hueBridgeIP, self.settings.hueBridgeUser))
-    r = requests.get("http://%s/api/%s/lights" % \
-      (self.settings.hueBridgeIP, self.settings.hueBridgeUser))
+    self.logger.debuglog("get_all_ligts. requesting from: http://%s:%s/api/%s/lights" % \
+      (self.settings.hueBridgeIP, self.settings.hueBridgePort, self.settings.hueBridgeUser))
+    r = requests.get("http://%s:%s/api/%s/lights" % \
+      (self.settings.hueBridgeIP, self.settings.hueBridgePort, self.settings.hueBridgeUser))
     j = r.json()
 
     if isinstance(j, list) and "error" in j[0]:
